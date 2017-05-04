@@ -96,9 +96,9 @@
     }
   }
 
-  AlloyEditorController.$inject = ['$q', '$scope', '$timeout'];
+  AlloyEditorController.$inject = ['$q', '$scope', '$timeout', '$log'];
 
-  function AlloyEditorController($q, $scope, $timeout) {
+  function AlloyEditorController($q, $scope, $timeout, $log) {
     var vm = this;
     var readyDeferred = $q.defer();
     var instance;
@@ -112,7 +112,18 @@
     $scope.$on('$destroy', function onDestroy() {
       // do not delete too fast or pending events will throw errors
       readyDeferred.promise.then(function() {
-        instance.destroy();
+        try { instance.destroy(); }
+        catch (e) { $log.debug('Cannot destroy instance:', e) }
+      });
+    });
+
+    $scope.$on('destroy-alloyeditor', function onDestroy() {
+      // do not delete too fast or pending events will throw errors
+      readyDeferred.promise.then(function() {
+        try { instance.destroy(); }
+        catch (e) {
+          $log.debug('Cannot destroy instance from custom event:', e)
+        }
       });
     });
 
